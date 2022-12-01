@@ -24,15 +24,15 @@ CLOUD_BUILD_SA_EMAIL="${PROJECT_NUMBER}@cloudbuild.gserviceaccount.com"
 BINAUTHZ_SA_EMAIL="service-${PROJECT_NUMBER}@gcp-sa-binaryauthorization.iam.gserviceaccount.com"
 
 #Create the following custom IAM role
-gcloud iam roles create cicdblogrole --project=${PROJECT_ID} \
-    --title="cicdblogrole" \
-    --description="Custom Role for GCP CICD Blog" \
+gcloud iam roles create cicddemorole --project=${PROJECT_ID} \
+    --title="cicddemorole" \
+    --description="Custom Role for GCP CICD demo" \
     --permissions="artifactregistry.repositories.create,container.clusters.get,binaryauthorization.attestors.get,binaryauthorization.attestors.list,binaryauthorization.policy.update,clouddeploy.deliveryPipelines.get,clouddeploy.releases.get,cloudkms.cryptoKeyVersions.useToSign,cloudkms.cryptoKeyVersions.viewPublicKey,containeranalysis.notes.attachOccurrence,containeranalysis.notes.create,containeranalysis.notes.listOccurrences,containeranalysis.notes.setIamPolicy,iam.serviceAccounts.actAs,ondemandscanning.operations.get,ondemandscanning.scans.analyzePackages,ondemandscanning.scans.listVulnerabilities,serviceusage.services.enable,storage.objects.get" \
     --stage=Beta
 
 #Add the newly created custom role, and "Cloud Deploy Admin" to the Cloud Build Service Account
 gcloud projects add-iam-policy-binding ${PROJECT_ID} \
-    --member="serviceAccount:${PROJECT_NUMBER}@cloudbuild.gserviceaccount.com" --role="projects/${PROJECT_ID}/roles/cicdblogrole"
+    --member="serviceAccount:${PROJECT_NUMBER}@cloudbuild.gserviceaccount.com" --role="projects/${PROJECT_ID}/roles/cicddemorole"
 
 gcloud projects add-iam-policy-binding ${PROJECT_ID} \
     --member="serviceAccount:${PROJECT_NUMBER}@cloudbuild.gserviceaccount.com" --role='roles/clouddeploy.admin'
@@ -60,8 +60,8 @@ NOTE_ID=cb-attestor-note
 
 #KMS variables
 KEY_LOCATION=global
-KEYRING=blog-keyring
-KEY_NAME=cd-blog
+KEYRING=demo-keyring
+KEY_NAME=cd-demo
 KEY_VERSION=1
 
 curl "https://containeranalysis.googleapis.com/v1/projects/${PROJECT_ID}/notes/?noteId=${NOTE_ID}" \
@@ -135,7 +135,7 @@ gcloud container binauthz attestors list
 gcloud artifacts repositories create test-repo \
     --repository-format=Docker \
     --location=europe-west4 \
-    --description="Artifact Registry for GCP DevSecOps CICD Blog" \
+    --description="Artifact Registry for GCP DevSecOps CICD demo" \
     --async
 
 #Create two Pub/Sub topics for email approval notification and error logging
@@ -144,7 +144,7 @@ gcloud pubsub topics create clouddeploy-operations
 
 #Create Cloud Function for email approval notification to deploy any worloads to productions
 gcloud functions deploy cd-approval \
-  --region=europe-west4 \
+  --region=europe-west3 \
   --runtime=nodejs16 \
   --source=./cloud-function \
   --entry-point=cloudDeployApproval \
@@ -153,7 +153,7 @@ gcloud functions deploy cd-approval \
 
 #Create Cloud Function for email notification if the workload deployment fails 
 gcloud functions deploy cd-deploy-notification \
-  --region=europe-west4 \
+  --region=europe-west3 \
   --runtime=nodejs16 \
   --source=./cloud-function/deployment-notification \
   --entry-point=cloudDeployStatus \
