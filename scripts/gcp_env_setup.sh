@@ -17,7 +17,7 @@ gcloud services enable cloudkms.googleapis.com
 gcloud services enable cloudfunctions.googleapis.com
 
 #GCP Project Variables
-LOCATION=us-central1
+LOCATION=europe-west4
 PROJECT_ID=$(gcloud config list --format 'value(core.project)')
 PROJECT_NUMBER=$(gcloud projects describe "${PROJECT_ID}" --format='value(projectNumber)')
 CLOUD_BUILD_SA_EMAIL="${PROJECT_NUMBER}@cloudbuild.gserviceaccount.com"
@@ -134,7 +134,7 @@ gcloud container binauthz attestors list
 #Create Artifact Registry Repository where images will be stored
 gcloud artifacts repositories create test-repo \
     --repository-format=Docker \
-    --location=us-central1 \
+    --location=europe-west4 \
     --description="Artifact Registry for GCP DevSecOps CICD Blog" \
     --async
 
@@ -144,7 +144,7 @@ gcloud pubsub topics create clouddeploy-operations
 
 #Create Cloud Function for email approval notification to deploy any worloads to productions
 gcloud functions deploy cd-approval \
-  --region=us-central1 \
+  --region=europe-west4 \
   --runtime=nodejs16 \
   --source=./cloud-function \
   --entry-point=cloudDeployApproval \
@@ -153,7 +153,7 @@ gcloud functions deploy cd-approval \
 
 #Create Cloud Function for email notification if the workload deployment fails 
 gcloud functions deploy cd-deploy-notification \
-  --region=us-central1 \
+  --region=europe-west4 \
   --runtime=nodejs16 \
   --source=./cloud-function/deployment-notification \
   --entry-point=cloudDeployStatus \
@@ -171,7 +171,10 @@ gcloud container clusters create test \
     --num-nodes=1 \
     --binauthz-evaluation-mode=PROJECT_SINGLETON_POLICY_ENFORCE \
     --labels=app=vulnapp-test \
-    --subnetwork=default
+    --subnetwork=default \
+    --enable-shielded-nodes \
+    --shielded-secure-boot \
+    --shielded-integrity-monitoring
  
 #GKE Cluster for Staging environment
 gcloud container clusters create staging \
@@ -181,7 +184,10 @@ gcloud container clusters create staging \
     --num-nodes=1 \
     --binauthz-evaluation-mode=PROJECT_SINGLETON_POLICY_ENFORCE \
     --labels=app=vulnapp-staging \
-    --subnetwork=default
+    --subnetwork=default \
+    --enable-shielded-nodes \
+    --shielded-secure-boot \
+    --shielded-integrity-monitoring
 
 #GKE Cluster for Production environment
 gcloud container clusters create prod \
@@ -191,4 +197,7 @@ gcloud container clusters create prod \
     --num-nodes=1 \
     --binauthz-evaluation-mode=PROJECT_SINGLETON_POLICY_ENFORCE \
     --labels=app=vulnapp-prod \
-    --subnetwork=default
+    --subnetwork=default \
+    --enable-shielded-nodes \
+    --shielded-secure-boot \
+    --shielded-integrity-monitoring
