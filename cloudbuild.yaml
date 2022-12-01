@@ -5,15 +5,15 @@ steps:
      args:
      - -c
      - |
-       docker build -t us-central1-docker.pkg.dev/$PROJECT_ID/$_CONTAINER_REPO_NAME/cd:$REVISION_ID -f ./Dockerfile . &&
-       docker image inspect us-central1-docker.pkg.dev/$PROJECT_ID/$_CONTAINER_REPO_NAME/cd:$REVISION_ID
+       docker build -t europe-west4-docker.pkg.dev/$PROJECT_ID/$_CONTAINER_REPO_NAME/cd:$REVISION_ID -f ./Dockerfile . &&
+       docker image inspect europe-west4-docker.pkg.dev/$PROJECT_ID/$_CONTAINER_REPO_NAME/cd:$REVISION_ID
    - id: Scan The Image
      name: 'gcr.io/cloud-builders/gcloud'
      entrypoint: /bin/bash
      args:
      - -c
      - |
-       gcloud artifacts docker images scan us-central1-docker.pkg.dev/$PROJECT_ID/$_CONTAINER_REPO_NAME/cd:$REVISION_ID \
+       gcloud artifacts docker images scan europe-west4-docker.pkg.dev/$PROJECT_ID/$_CONTAINER_REPO_NAME/cd:$REVISION_ID \
        --format='value(response.scan)' > /workspace/scan_id.txt
    - id: Check For Vulnerabilities within the Image
      name: 'gcr.io/cloud-builders/gcloud'
@@ -30,7 +30,7 @@ steps:
      args:
      - -c
      - |
-       docker push us-central1-docker.pkg.dev/$PROJECT_ID/$_CONTAINER_REPO_NAME/cd:$REVISION_ID
+       docker push europe-west4-docker.pkg.dev/$PROJECT_ID/$_CONTAINER_REPO_NAME/cd:$REVISION_ID
    - id: Capture Image Digest Information
      name: 'gcr.io/cloud-builders/gcloud'
      entrypoint: /bin/bash
